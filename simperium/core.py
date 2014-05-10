@@ -59,6 +59,60 @@ class Auth(object):
         response = self._request(self.appname+'/authorize/', data)
         return json.loads(response.read())['access_token']
 
+    def update(self, username, password, new_username=None, new_password=None):
+        """
+        Updates username or password for a user. Requires both current username
+        and password.
+
+        @username: Username
+        @password: Password
+        @new_username: New username (optional)
+        @new_password: New password (optional)
+
+        returns string 'success' if succeed, otherwise throws HTTPError
+        """
+        data = {
+            'client_id': self.api_key,
+            'username': username,
+            'password': password, }
+        if new_username:
+            data['new_username'] = new_username
+        if new_password:
+            data['new_password'] = new_password
+        response = self._request(self.appname+'/update/', data)
+        return json.loads(response.read())['status']
+
+    def reset_password(self, username, new_password):
+        """
+        Changes password for a user without current password. Requires API key
+        with admin privileges.
+
+        @username: Username
+        @new_password: New password
+
+        returns string 'success' if succeed, otherwise throws HTTPError
+        """
+        data = {
+            'username': username,
+            'new_password': new_password, }
+        headers = {'X-Simperium-API-Key': '%s' % self.api_key}
+        response = self._request(self.appname+'/reset_password/', data, headers)
+        return json.loads(response.read())['status']
+
+    def delete(self, username):
+        """
+        Deletes a user and all user data. Requires an API key with admin
+        privileges.
+
+        @username: Username to delete
+
+        returns string 'success' if succeed, otherwise throws HTTPError
+        """
+        data = {'username': username}
+        headers = {'X-Simperium-API-Key': '%s' % self.api_key}
+        response = self._request(self.appname+'/delete/', data, headers)
+        return json.loads(response.read())['status']
+
 
 class Bucket(object):
     """
